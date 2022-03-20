@@ -8,6 +8,7 @@ import { Menu, Breadcrumb } from 'antd'
 import AdHoc from 'pages/AdHoc/AdHoc.lazy'
 import Plans from 'pages/Plans/Plans.lazy'
 import PlanDetails from 'pages/PlanDetails/PlanDetails.lazy'
+import Exercise from 'pages/Exercise/Exercise.lazy'
 type MenuOptions = 'ad-hoc' | 'plans'
 const Header = () => {
     const location = useLocation()
@@ -64,6 +65,8 @@ const App = () => {
                     <Route path="ad-hoc" element={<AdHoc />}></Route>
                     <Route path="plans" element={<Plans />}></Route>
                     <Route path="plans/:token" element={<PlanDetails />} />
+                    <Route path="plans/:token/:name" element={<Exercise />} />
+                    <Route path="exercise/:name" element={<Exercise />} />
                 </Route>
             </Routes>
         </BrowserRouter>
