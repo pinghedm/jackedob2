@@ -19,7 +19,7 @@ const Plans = ({}: PlansProps) => {
                             title={plan.name}
                             style={{ maxWidth: '350px', marginTop: '15px' }}
                             key={plan.token}>
-                            {plan.numExercises} exercises.
+                            {plan.exerciseNames.length} exercises.
                             <br />
                             <br />
                             Most recent completion?

@@ -1,24 +1,23 @@
+import { ExerciseInfo, getExerciseDetails } from 'services/exercise_service'
 export interface WorkoutPlan {
     name: string
     token: string
-    numExercises: 5
+    exerciseNames: string[]
     lastUpdated?: string // iso string
 }
 
 export interface WorkoutPlanDetails extends WorkoutPlan {
-    exercises: {
-        name: string
-        lastTime: {
-            date: string // iso string
-            sets: { weight: number; reps: number }[]
-        }
-    }[]
+    exercises: ExerciseInfo[]
 }
 
 const plans: WorkoutPlan[] = [
-    { name: 'Danny - Sunday', token: 'P_SUNDAY', numExercises: 5 },
-    { name: 'Danny - Tuesday', token: 'P_TUESDAY', numExercises: 5 },
-    { name: 'Danny - Thursday', token: 'P_THURSDAY', numExercises: 5 },
+    {
+        name: 'Danny - Sunday',
+        token: 'P_SUNDAY',
+        exerciseNames: ['Exercise 1 Name', 'Exercise 2 Name'],
+    },
+    { name: 'Danny - Tuesday', token: 'P_TUESDAY', exerciseNames: ['Exercise 1 Name'] },
+    { name: 'Danny - Thursday', token: 'P_THURSDAY', exerciseNames: ['Exercise 1 Name'] },
 ]
 
 export const getPlans = () => {
@@ -33,19 +32,9 @@ export const getPlanDetails = (planToken: string): WorkoutPlanDetails | null => 
 
         return {
             ...plan,
-            exercises: [
-                {
-                    name: 'Exercise 1 Name',
-                    lastTime: {
-                        date: yesterday.toISOString(),
-                        sets: [
-                            { weight: 15, reps: 5 },
-                            { weight: 15, reps: 5 },
-                            { weight: 15, reps: 5 },
-                        ],
-                    },
-                },
-            ],
+            exercises: plan.exerciseNames
+                .map(name => getExerciseDetails(name))
+                .filter(e => !e !== undefined) as ExerciseInfo[],
         }
     } else {
         return null
