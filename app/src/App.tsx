@@ -4,11 +4,14 @@ import './App.css'
 
 import 'antd/dist/antd.css'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
-import { Menu, Breadcrumb } from 'antd'
+import { Menu, Breadcrumb, Row, Col } from 'antd'
 import AdHoc from 'pages/AdHoc/AdHoc.lazy'
 import Plans from 'pages/Plans/Plans.lazy'
 import PlanDetails from 'pages/PlanDetails/PlanDetails.lazy'
 import Exercise from 'pages/Exercise/Exercise.lazy'
+import { useCurrentUser } from 'services/firebase'
+import LoginPage from 'pages/LoginPage/LoginPage.lazy'
+import { logout } from 'services/firebase'
 type MenuOptions = 'ad-hoc' | 'plans'
 const Header = () => {
     const location = useLocation()
@@ -29,19 +32,32 @@ const Header = () => {
     )
     return (
         <>
-            <div style={{ width: '250px', margin: 'auto' }}>
-                <Menu
-                    mode="horizontal"
-                    selectedKeys={[currentMenuSelection]}
-                    onClick={e => setCurrentMenuSelection(e.key as MenuOptions)}>
-                    <Menu.Item key="ad-hoc">
-                        <Link to="ad-hoc">Ad Hoc</Link>
-                    </Menu.Item>
-                    <Menu.Item key="plans">
-                        <Link to="plans">Plans</Link>
-                    </Menu.Item>
-                </Menu>
-            </div>
+            <Row>
+                <Col span={6} offset={8}>
+                    <Menu
+                        mode="horizontal"
+                        selectedKeys={[currentMenuSelection]}
+                        onClick={e => setCurrentMenuSelection(e.key as MenuOptions)}>
+                        <Menu.Item key="ad-hoc">
+                            <Link to="ad-hoc">Ad Hoc</Link>
+                        </Menu.Item>
+                        <Menu.Item key="plans">
+                            <Link to="plans">Plans</Link>
+                        </Menu.Item>
+                    </Menu>
+                </Col>
+                <Col span={2} offset={8}>
+                    <Menu>
+                        <Menu.Item
+                            key="logout"
+                            onClick={() => {
+                                logout()
+                            }}>
+                            Logout
+                        </Menu.Item>
+                    </Menu>
+                </Col>
+            </Row>
             <div style={{ marginLeft: '5%', marginBottom: '15px' }}>
                 <Breadcrumb>
                     {[
@@ -56,6 +72,10 @@ const Header = () => {
 }
 
 const App = () => {
+    const user = useCurrentUser()
+    if (user === null) {
+        return <LoginPage />
+    }
     return (
         <BrowserRouter>
             <Header />
