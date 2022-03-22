@@ -1,7 +1,9 @@
 import React from 'react'
-import { Typography, Card } from 'antd'
+import { Typography, Card, Button } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
 import { getPlans } from 'services/plans_service'
 import { Link } from 'react-router-dom'
+import { genPlanToken } from 'services/utils'
 export interface PlansProps {}
 
 const Plans = ({}: PlansProps) => {
@@ -26,11 +28,22 @@ const Plans = ({}: PlansProps) => {
                         </Card>
                     </Link>
                 ))}
-                <Card
-                    title="Add new plan"
-                    style={{ color: 'green', width: '350px', marginTop: '15px' }}>
-                    + New Plan
-                </Card>
+                <Button
+                    onClick={() => {}}
+                    type="link"
+                    style={{
+                        width: '350px',
+                        margin: 'auto',
+                        marginTop: '15px',
+                        display: 'inline-block',
+                    }}>
+                    <Link to={genPlanToken()}>
+                        <Card style={{ color: 'green' }}>
+                            <PlusOutlined />
+                            Add new plan
+                        </Card>
+                    </Link>
+                </Button>
             </div>
         </>
     )

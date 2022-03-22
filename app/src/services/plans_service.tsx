@@ -1,4 +1,5 @@
 import { ExerciseInfo, getExerciseDetails } from 'services/exercise_service'
+import { cheapSlugify } from 'services/utils'
 export interface WorkoutPlan {
     name: string
     token: string
@@ -33,8 +34,8 @@ export const getPlanDetails = (planToken: string): WorkoutPlanDetails | null => 
         return {
             ...plan,
             exercises: plan.exerciseNames
-                .map(name => getExerciseDetails(name))
-                .filter(e => !e !== undefined) as ExerciseInfo[],
+                .map(name => getExerciseDetails(cheapSlugify(name)))
+                .filter(e => e !== undefined) as ExerciseInfo[],
         }
     } else {
         return null

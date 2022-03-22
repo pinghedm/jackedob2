@@ -12,6 +12,7 @@ import Exercise from 'pages/Exercise/Exercise.lazy'
 import { useCurrentUser } from 'services/firebase'
 import LoginPage from 'pages/LoginPage/LoginPage.lazy'
 import { logout } from 'services/firebase'
+import { getPlanDetails } from 'services/plans_service'
 type MenuOptions = 'ad-hoc' | 'plans'
 const Header = () => {
     const location = useLocation()
@@ -19,11 +20,21 @@ const Header = () => {
     const breadCrumbNameByPath: Record<string, string> = {
         plans: 'Plans',
     }
+    const getBreadCrumbName = (pathSegment: string) => {
+        if (pathSegment === 'plans') {
+            return 'Plans'
+        } else if (pathSegment.startsWith('P_')) {
+            const plan = getPlanDetails(pathSegment)
+            return plan?.name ?? 'Unknown Plan'
+        } else {
+            return pathSegment
+        }
+    }
     const breadCrumbs = pathSnippets.map((seg, idx) => {
         const url = `${pathSnippets.slice(0, idx + 1).join('/')}`
         return (
             <Breadcrumb.Item key={url}>
-                <Link to={url}>{breadCrumbNameByPath?.[url] ?? seg}</Link>
+                <Link to={url}>{getBreadCrumbName(seg) ?? seg}</Link>
             </Breadcrumb.Item>
         )
     })

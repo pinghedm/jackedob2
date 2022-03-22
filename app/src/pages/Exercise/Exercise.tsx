@@ -17,9 +17,7 @@ const Exercise = ({}: ExerciseProps) => {
     const plan = getPlanDetails(planToken ?? '')
     const unfinishedExercisesInPlan: string[] = []
     plan?.exerciseNames?.forEach(name => {
-        console.log(name)
         const exercise = getExerciseDetails(cheapSlugify(name))
-        console.log(exercise)
         if (exercise) {
             const doneToday = getSetsFromSameSession(new Date(), exercise).length
             if (!doneToday) {
