@@ -25,7 +25,6 @@ if (emulatorAuthDomain.includes('localhost')) {
 }
 const db = getFirestore(app)
 const emulatorDatabaseUrl = process.env.REACT_APP_FIRESTORE_URL || ''
-console.log(emulatorDatabaseUrl)
 if (emulatorDatabaseUrl) {
     connectFirestoreEmulator(
         db,

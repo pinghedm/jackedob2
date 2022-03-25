@@ -93,9 +93,7 @@ const App = () => {
 }
 
 const ActualApp = () => {
-    console.log(1111)
     const user = useCurrentUser()
-    console.log(222)
     if (user === null) {
         return <LoginPage />
     }
