@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { initializeApp } from 'firebase/app'
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth'
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut,
+    connectAuthEmulator,
+} from 'firebase/auth'
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
 
 const firebaseConfig = {
     apiKey: 'AIzaSyA1kpjSV82sGSnh0LXgrluWL3KZH8xbBb4',
@@ -11,7 +18,21 @@ const firebaseConfig = {
     appId: '1:195212004841:web:408503735b2194b5d60f78',
 }
 const app = initializeApp(firebaseConfig)
-const auth = getAuth(app)
+const auth = getAuth()
+const emulatorAuthDomain = process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || ''
+if (emulatorAuthDomain.includes('localhost')) {
+    connectAuthEmulator(auth, emulatorAuthDomain)
+}
+const db = getFirestore(app)
+const emulatorDatabaseUrl = process.env.REACT_APP_FIRESTORE_URL || ''
+console.log(emulatorDatabaseUrl)
+if (emulatorDatabaseUrl) {
+    connectFirestoreEmulator(
+        db,
+        emulatorDatabaseUrl.split('//')[1].split(':')[0],
+        Number(emulatorDatabaseUrl.split(':')[1].split(':')[0]),
+    )
+}
 
 export const useCurrentUser = () => {
     const [curUser, setCurUser] = useState(auth.currentUser)
