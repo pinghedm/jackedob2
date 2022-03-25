@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { getPlanDetails } from 'services/plans_service'
 import { useNavigate, Link } from 'react-router-dom'
@@ -10,8 +10,12 @@ const PlanDetails = ({}: PlanDetailsProps) => {
     const navigate = useNavigate()
     const params = useParams<{ token: string }>()
     const plan = getPlanDetails(params?.token ?? '')
-    if (plan === null) {
-        navigate('/plans')
+    useEffect(() => {
+        if (plan === null) {
+            navigate('/plans')
+        }
+    }, [plan, navigate])
+    if (!plan) {
         return null
     }
     return (

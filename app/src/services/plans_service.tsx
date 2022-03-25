@@ -1,5 +1,6 @@
 import { ExerciseInfo, getExerciseDetails } from 'services/exercise_service'
 import { cheapSlugify } from 'services/utils'
+import { useQuery } from 'react-query'
 export interface WorkoutPlan {
     name: string
     token: string
@@ -20,6 +21,11 @@ const plans: WorkoutPlan[] = [
     { name: 'Danny - Tuesday', token: 'P_TUESDAY', exerciseNames: ['Exercise 1 Name'] },
     { name: 'Danny - Thursday', token: 'P_THURSDAY', exerciseNames: ['Exercise 1 Name'] },
 ]
+
+export const usePlans = () => {
+    const query = useQuery(['plans'], getPlans)
+    return query
+}
 
 export const getPlans = () => {
     return plans // TODO: hit api

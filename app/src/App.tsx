@@ -3,6 +3,7 @@ import logo from './logo.svg'
 import './App.css'
 
 import 'antd/dist/antd.css'
+import { QueryClient, QueryClientProvider } from 'react-query'
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
 import { Menu, Breadcrumb, Row, Col } from 'antd'
 import AdHoc from 'pages/AdHoc/AdHoc.lazy'
@@ -83,6 +84,15 @@ const Header = () => {
 }
 
 const App = () => {
+    const queryClient = new QueryClient()
+    return (
+        <QueryClientProvider client={queryClient}>
+            <ActualApp />
+        </QueryClientProvider>
+    )
+}
+
+const ActualApp = () => {
     const user = useCurrentUser()
     if (user === null) {
         return <LoginPage />
