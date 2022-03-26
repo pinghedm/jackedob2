@@ -7,8 +7,9 @@ import {
     signOut,
     connectAuthEmulator,
 } from 'firebase/auth'
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
-
+import { getFirestore, connectFirestoreEmulator, setLogLevel } from 'firebase/firestore'
+setLogLevel('debug')
+const databaseUrl = process.env.REACT_APP_FIRESTORE_URL || '' // TODO look up what prod is
 const firebaseConfig = {
     apiKey: 'AIzaSyA1kpjSV82sGSnh0LXgrluWL3KZH8xbBb4',
     authDomain: 'jackedob2.firebaseapp.com',
@@ -16,23 +17,24 @@ const firebaseConfig = {
     storageBucket: 'jackedob2.appspot.com',
     messagingSenderId: '195212004841',
     appId: '1:195212004841:web:408503735b2194b5d60f78',
+    // databaseURL: databaseUrl,
 }
 const app = initializeApp(firebaseConfig)
-const auth = getAuth()
+export const auth = getAuth()
 const emulatorAuthDomain = process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || ''
 if (emulatorAuthDomain.includes('localhost')) {
     connectAuthEmulator(auth, emulatorAuthDomain)
 }
-const db = getFirestore(app)
-const emulatorDatabaseUrl = process.env.REACT_APP_FIRESTORE_URL || ''
-if (emulatorDatabaseUrl) {
+export const db = getFirestore(app)
+if (databaseUrl.includes('localhost')) {
     connectFirestoreEmulator(
         db,
-        emulatorDatabaseUrl.split('//')[1].split(':')[0],
-        Number(emulatorDatabaseUrl.split(':')[1].split(':')[0]),
+        databaseUrl.split('//')[1].split(':')[0],
+        Number(databaseUrl.split(':').slice(-1).pop()),
     )
 }
 
+// auth
 export const useCurrentUser = () => {
     const [curUser, setCurUser] = useState(auth.currentUser)
     onAuthStateChanged(auth, user => {

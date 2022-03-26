@@ -6,7 +6,7 @@ import {
     ExerciseInfo,
     getSetsFromSameSession,
 } from 'services/exercise_service'
-import { getPlanDetails } from 'services/plans_service'
+import { usePlanDetails } from 'services/plans_service'
 import { InputNumber, Button } from 'antd'
 import { cheapSlugify } from 'services/utils'
 export interface ExerciseProps {}
@@ -14,7 +14,7 @@ export interface ExerciseProps {}
 const Exercise = ({}: ExerciseProps) => {
     const location = useLocation() // TODO If part of a plan flow, show a 'next' button or something?
     const planToken = location.pathname.split('/').find(seg => seg.startsWith('P_'))
-    const plan = getPlanDetails(planToken ?? '')
+    const { data: plan } = usePlanDetails(planToken ?? '')
     const unfinishedExercisesInPlan: string[] = []
     plan?.exerciseNames?.forEach(name => {
         const exercise = getExerciseDetails(cheapSlugify(name))

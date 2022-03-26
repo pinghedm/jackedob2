@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import logo from './logo.svg'
 import './App.css'
 
@@ -13,22 +13,25 @@ import Exercise from 'pages/Exercise/Exercise.lazy'
 import { useCurrentUser } from 'services/firebase'
 import LoginPage from 'pages/LoginPage/LoginPage.lazy'
 import { logout } from 'services/firebase'
-import { getPlanDetails } from 'services/plans_service'
+import { usePlans, WorkoutPlan } from 'services/plans_service'
 type MenuOptions = 'ad-hoc' | 'plans'
 const Header = () => {
     const location = useLocation()
+    const { data: plans } = usePlans()
+    const plansByToken: Record<string, WorkoutPlan> = useMemo(
+        () => plans?.reduce((prev, cur) => ({ ...prev, [cur.token]: cur } ?? {}), {}) ?? {},
+        [plans],
+    )
     const pathSnippets = location.pathname.split('/').filter(path => !!path)
     const breadCrumbNameByPath: Record<string, string> = {
         plans: 'Plans',
     }
     const getBreadCrumbName = (pathSegment: string) => {
-        if (pathSegment === 'plans') {
-            return 'Plans'
-        } else if (pathSegment.startsWith('P_')) {
-            const plan = getPlanDetails(pathSegment)
+        if (pathSegment.startsWith('P_')) {
+            const plan = plansByToken?.[pathSegment]
             return plan?.name ?? 'Unknown Plan'
         } else {
-            return pathSegment
+            return breadCrumbNameByPath?.[pathSegment] ?? pathSegment
         }
     }
     const breadCrumbs = pathSnippets.map((seg, idx) => {

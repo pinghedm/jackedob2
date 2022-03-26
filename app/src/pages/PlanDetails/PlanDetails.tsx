@@ -1,22 +1,70 @@
-import React, { useEffect } from 'react'
+import React, { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getPlanDetails } from 'services/plans_service'
-import { useNavigate, Link } from 'react-router-dom'
-import { Typography, Card } from 'antd'
+import { usePlanDetails, updatePlan } from 'services/plans_service'
+import { Link } from 'react-router-dom'
+import { Typography, Card, Input, Button, Spin } from 'antd'
 import { mostRecentSet } from 'services/exercise_service'
+import { useMutation, useQueryClient } from 'react-query'
+
+interface AddNewPlanProps {
+    planToken: string
+}
+const AddNewPlan = ({ planToken }: AddNewPlanProps) => {
+    const [name, setName] = useState('')
+    const queryClient = useQueryClient()
+
+    const createPlanMutation = useMutation(
+        async (name: string) =>
+            await updatePlan(planToken, { name, token: planToken, exerciseNames: [] }),
+        {
+            onMutate: async (name: string) => {
+                console.log('onmutate')
+                await queryClient.cancelQueries(['plans', planToken])
+            },
+            onSettled: () => {
+                console.log(3333333)
+                queryClient.invalidateQueries(['plans', planToken])
+            },
+        },
+    )
+
+    return (
+        <Card style={{ width: '50%', margin: 'auto', marginTop: '10%' }}>
+            <Typography.Title level={3}>Add New Plan</Typography.Title>
+            <Input
+                placeholder="Plan Name"
+                value={name}
+                onChange={e => {
+                    setName(e.target.value)
+                }}
+                onPressEnter={e => {
+                    createPlanMutation.mutate(name)
+                }}
+            />
+            <Button
+                onClick={() => {
+                    createPlanMutation.mutate(name)
+                }}
+                type="primary"
+                style={{ marginTop: '10px' }}
+                disabled={!name}>
+                Create
+            </Button>
+        </Card>
+    )
+}
+
 export interface PlanDetailsProps {}
 
 const PlanDetails = ({}: PlanDetailsProps) => {
-    const navigate = useNavigate()
     const params = useParams<{ token: string }>()
-    const plan = getPlanDetails(params?.token ?? '')
-    useEffect(() => {
-        if (plan === null) {
-            navigate('/plans')
-        }
-    }, [plan, navigate])
+    const { data: plan, status: planStatus } = usePlanDetails(params?.token ?? '')
+    if (planStatus !== 'success') {
+        return <Spin />
+    }
+
     if (!plan) {
-        return null
+        return <AddNewPlan planToken={params?.token ?? ''} />
     }
     return (
         <>

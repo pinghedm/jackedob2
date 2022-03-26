@@ -1,18 +1,18 @@
 import React from 'react'
 import { Typography, Card, Button } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
-import { getPlans } from 'services/plans_service'
+import { usePlans } from 'services/plans_service'
 import { Link } from 'react-router-dom'
 import { genPlanToken } from 'services/utils'
 export interface PlansProps {}
 
 const Plans = ({}: PlansProps) => {
-    const plans = getPlans()
+    const { data: plans } = usePlans()
     return (
         <>
             <Typography.Title>Saved Plans</Typography.Title>
             <div style={{ width: '600px', margin: 'auto' }}>
-                {plans.map(plan => (
+                {plans?.map(plan => (
                     <Link
                         to={plan.token}
                         key={plan.token}

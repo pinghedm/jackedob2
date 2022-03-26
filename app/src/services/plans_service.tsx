@@ -1,6 +1,8 @@
 import { ExerciseInfo, getExerciseDetails } from 'services/exercise_service'
 import { cheapSlugify } from 'services/utils'
 import { useQuery } from 'react-query'
+import { collection, setDoc, getDoc, doc, query, getDocs } from 'firebase/firestore'
+import { db, auth } from 'services/firebase'
 export interface WorkoutPlan {
     name: string
     token: string
@@ -22,21 +24,53 @@ const plans: WorkoutPlan[] = [
     { name: 'Danny - Thursday', token: 'P_THURSDAY', exerciseNames: ['Exercise 1 Name'] },
 ]
 
+export const updatePlan = async (planToken: string, planData: WorkoutPlan) => {
+    const user = auth.currentUser
+    if (user === null) {
+        console.log('bad')
+        return {}
+    }
+    const now = new Date()
+    const newPlanInfo = { ...planData, token: planToken, lastUpdated: now.toISOString() }
+    console.log('good', user.uid)
+    try {
+        await setDoc(doc(db, `/users/${user.uid}/plans`, planToken), newPlanInfo)
+        return newPlanInfo
+    } catch (e) {
+        console.log(e)
+    }
+}
+
 export const usePlans = () => {
     const query = useQuery(['plans'], getPlans)
     return query
 }
 
-export const getPlans = () => {
-    return plans // TODO: hit api
+const getPlans = async () => {
+    const user = auth.currentUser
+    if (user === null) {
+        return []
+    }
+    const ref = collection(db, `/users/${user.uid}/plans`)
+    const q = query(ref)
+    const queryResult = await getDocs(q)
+    const plans: WorkoutPlan[] = []
+    queryResult.forEach(d => plans.push(d.data() as WorkoutPlan))
+    return plans
+}
+export const usePlanDetails = (planToken: string) => {
+    const query = useQuery(['plans', planToken], () => getPlanDetails(planToken))
+    return query
 }
 
-export const getPlanDetails = (planToken: string): WorkoutPlanDetails | null => {
-    const plan = plans.find(p => p.token === planToken)
+const getPlanDetails = async (planToken: string) => {
+    const user = auth.currentUser
+    if (user === null) {
+        return null
+    }
+    const ref = doc(db, `/users/${user.uid}/plans/${planToken}`)
+    const plan = (await getDoc(ref)).data() as WorkoutPlanDetails
     if (plan) {
-        const yesterday = new Date()
-        yesterday.setDate(yesterday.getDate() - 1)
-
         return {
             ...plan,
             exercises: plan.exerciseNames
