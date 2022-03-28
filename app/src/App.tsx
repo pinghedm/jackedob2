@@ -100,8 +100,9 @@ const ActualApp = () => {
     if (user === null) {
         return <LoginPage />
     }
+    const baseName = process.env.publicUrl
     return (
-        <BrowserRouter>
+        <BrowserRouter basename={baseName ? baseName : undefined}>
             <Header />
             <Routes>
                 <Route path="/">
