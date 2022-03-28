@@ -69,7 +69,7 @@ export const AddNewExercise = ({ plan }: AddNewExerciseProps) => {
     const queryClient = useQueryClient()
 
     const addExerciseMutation = useMutation(
-        async () => {
+        () => {
             const exercise = { name, slugName: cheapSlugify(name), bodyWeight: isBodyWeight }
             const promises = []
             if (!(exercises ?? []).map(e => e.name).includes(exercise.name)) {
@@ -78,7 +78,7 @@ export const AddNewExercise = ({ plan }: AddNewExerciseProps) => {
                 promises.push(exercisePromise)
             }
             if (plan && !plan.exerciseNames.includes(exercise.name)) {
-                const newPlanPromise = await updatePlan(plan.token, {
+                const newPlanPromise = updatePlan(plan.token, {
                     ...plan,
                     exerciseNames: [...plan.exerciseNames, exercise.name],
                 })
@@ -94,12 +94,12 @@ export const AddNewExercise = ({ plan }: AddNewExerciseProps) => {
                 }
             },
             onSettled: () => {
-                setName('')
-                setIsBodyWeight(false)
                 queryClient.invalidateQueries(['exercises'])
                 if (plan) {
                     queryClient.invalidateQueries(['plans', plan.token])
                 }
+                setName('')
+                setIsBodyWeight(false)
             },
         },
     )
@@ -119,7 +119,11 @@ export const AddNewExercise = ({ plan }: AddNewExerciseProps) => {
             />
             Bodyweight Exercise?
             <AutoComplete
+                value={name}
                 options={exercises?.map(e => ({ value: e.name }))}
+                onChange={value => {
+                    setName(value)
+                }}
                 onSelect={(value: string) => {
                     setName(value)
                 }}>
@@ -128,10 +132,6 @@ export const AddNewExercise = ({ plan }: AddNewExerciseProps) => {
                         addExerciseMutation.mutate()
                     }}
                     placeholder="Exercise Name"
-                    value={name}
-                    onChange={e => {
-                        setName(e.target.value)
-                    }}
                 />
             </AutoComplete>
             <Button

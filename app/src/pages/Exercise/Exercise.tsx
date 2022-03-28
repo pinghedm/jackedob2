@@ -75,11 +75,14 @@ const Exercise = ({}: ExerciseProps) => {
             <Typography.Title level={3}>Today's Sets</Typography.Title>
             {setsToday.map((s, idx) => (
                 <div key={idx}>
-                    {s.reps} @ {s.weight}
+                    {s.reps} @ {thisExercise?.bodyWeight ? 'You' : s.weight}
                 </div>
             ))}
             <div>
                 <InputNumber
+                    onClick={e => {
+                        setNewReps(null)
+                    }}
                     autoFocus
                     value={newReps ?? ''}
                     placeholder="Num reps"
@@ -89,6 +92,9 @@ const Exercise = ({}: ExerciseProps) => {
                     <>
                         @{' '}
                         <InputNumber
+                            onClick={e => {
+                                setNewWeight(null)
+                            }}
                             value={newWeight ?? ''}
                             placeholder="Weight (lbs)"
                             onChange={val => setNewWeight(val || 0)}
