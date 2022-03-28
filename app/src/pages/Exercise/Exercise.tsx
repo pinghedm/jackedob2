@@ -15,7 +15,7 @@ export interface ExerciseProps {}
 const Exercise = ({}: ExerciseProps) => {
     const queryClient = useQueryClient()
     const navigate = useNavigate()
-    const location = useLocation() // TODO If part of a plan flow, show a 'next' button or something?
+    const location = useLocation()
     const planToken = location.pathname.split('/').find(seg => seg.startsWith('P_'))
     const exerciseSlugName = location.pathname.split('/').slice(-1).pop() ?? ''
     const today = new Date().toDateString()
@@ -65,8 +65,8 @@ const Exercise = ({}: ExerciseProps) => {
                 </Typography.Text>
                 <br />
                 {newestSet
-                    ? getSetsFromSameSession(newestSet.date, thisExercise).map(s => (
-                          <div>
+                    ? getSetsFromSameSession(newestSet.date, thisExercise).map((s, idx) => (
+                          <div key={idx}>
                               {s.reps} @ {s.weight}
                           </div>
                       ))

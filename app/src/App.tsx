@@ -4,7 +4,7 @@ import './App.css'
 
 import 'antd/dist/antd.css'
 import { QueryClient, QueryClientProvider } from 'react-query'
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom'
 import { Menu, Breadcrumb, Row, Col } from 'antd'
 import AdHoc from 'pages/AdHoc/AdHoc.lazy'
 import Plans from 'pages/Plans/Plans.lazy'
@@ -111,6 +111,7 @@ const ActualApp = () => {
                     <Route path="plans/:token" element={<PlanDetails />} />
                     <Route path="plans/:token/:name" element={<Exercise />} />
                     <Route path="exercise/:name" element={<Exercise />} />
+                    <Route path="exercise" element={<Navigate replace to="/" />}></Route>
                 </Route>
             </Routes>
         </BrowserRouter>

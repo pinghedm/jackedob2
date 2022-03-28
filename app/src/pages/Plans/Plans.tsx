@@ -22,9 +22,6 @@ const Plans = ({}: PlansProps) => {
                             style={{ maxWidth: '350px', marginTop: '15px' }}
                             key={plan.token}>
                             {plan.exerciseNames.length} exercises.
-                            <br />
-                            <br />
-                            Most recent completion?
                         </Card>
                     </Link>
                 ))}

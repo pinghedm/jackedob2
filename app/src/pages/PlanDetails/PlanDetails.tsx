@@ -25,7 +25,6 @@ const AddNewPlan = ({ planToken }: AddNewPlanProps) => {
             await updatePlan(planToken, { name, token: planToken, exerciseNames: [] }),
         {
             onMutate: async (name: string) => {
-                console.log('onmutate')
                 await queryClient.cancelQueries(['plans', planToken])
             },
             onSettled: () => {
