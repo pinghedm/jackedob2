@@ -80,15 +80,14 @@ const Exercise = ({}: ExerciseProps) => {
             ))}
             <div>
                 <InputNumber
+                    autoFocus
                     value={newReps ?? ''}
-                    defaultValue={0}
                     placeholder="Num reps"
                     onChange={val => setNewReps(val || 0)}
                 />{' '}
                 @{' '}
                 <InputNumber
                     value={newWeight ?? ''}
-                    defaultValue={0}
                     placeholder="Weight (lbs)"
                     onChange={val => setNewWeight(val || 0)}
                 />

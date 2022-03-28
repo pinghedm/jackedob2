@@ -103,7 +103,9 @@ const AddNewExercise = ({ plan }: AddNewExerciseProps) => {
             style={{ width: '350px' }}>
             <AutoComplete
                 options={exercises?.map(e => ({ value: e.name }))}
-                onSelect={(value: string) => console.log('selected', value)}>
+                onSelect={(value: string) => {
+                    setName(value)
+                }}>
                 <Input
                     placeholder="Exercise Name"
                     value={name}
@@ -130,7 +132,7 @@ const PlanDetails = ({}: PlanDetailsProps) => {
     const params = useParams<{ token: string }>()
     const planToken = params?.token ?? ''
     const plan = usePlanDetails(params?.token ?? '')
-    if (!plan) {
+    if (!plan?.token) {
         return <AddNewPlan planToken={planToken} />
     }
     return (

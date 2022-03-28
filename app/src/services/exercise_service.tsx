@@ -30,7 +30,7 @@ const getExercises = async () => {
 }
 
 export const updateExercise = async (exerciseInfo: ExerciseInfo) => {
-    await setDoc(doc(db, 'exercises', exerciseInfo.slugName), exerciseInfo)
+    await setDoc(doc(db, `exercises/${exerciseInfo.slugName}`), exerciseInfo)
     return exerciseInfo
 }
 
@@ -39,7 +39,7 @@ export const updateExerciseDetails = async (exerciseDetails: ExerciseDetail) => 
     if (!user) {
         return null
     }
-    const ref = doc(db, `users/$[user.uid}/exercises/${exerciseDetails.slugName}`)
+    const ref = doc(db, `users/${user.uid}/exercises/${exerciseDetails.slugName}`)
     await setDoc(ref, exerciseDetails)
     return exerciseDetails
 }
@@ -52,8 +52,8 @@ const getExerciseDetails = async (slugName: string): Promise<ExerciseDetail | nu
     const eRef = doc(db, 'exercises', slugName)
     const exerciseInfo = (await getDoc(eRef)).data() as ExerciseInfo
     const ref = doc(db, `users/${user.uid}/exercises/${slugName}`)
-    const sets = ((await getDoc(ref)).data() ?? []) as ExerciseDetail['sets']
-    return { ...exerciseInfo, sets: sets.filter(s => !!s) }
+    const details = ((await getDoc(ref)).data() ?? []) as ExerciseDetail
+    return { ...exerciseInfo, sets: details.sets.filter(s => !!s) }
 }
 export const useExerciseDetails = (exerciseSlugNames: string[]): ExerciseDetail[] => {
     const queries = useQueries(
