@@ -26,7 +26,7 @@
     "scripts": {
         "start": "BROWSER=none react-scripts start",
         "firebase": "firebase emulators:start",
-        "build": "REACT_APP_FIREBASE_AUTH_DOMAIN= REACT_APP_FIRESTORE_URL= PUBLIC_URL=http://dannypinghero.me/jackedob2 react-scripts build",
+        "build": "REACT_APP_FIREBASE_AUTH_DOMAIN= REACT_APP_FIRESTORE_URL= REACT_APP_BASE_NAME='/jackedob2' react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject"
     },

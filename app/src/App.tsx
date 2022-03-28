@@ -100,7 +100,7 @@ const ActualApp = () => {
     if (user === null) {
         return <LoginPage />
     }
-    const baseName = process.env.publicUrl
+    const baseName = process.env.REACT_APP_BASE_NAME
     return (
         <BrowserRouter basename={baseName ? baseName : undefined}>
             <Header />
