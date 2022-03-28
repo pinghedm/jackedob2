@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { usePlanDetails, updatePlan, WorkoutPlan } from 'services/plans_service'
 import { Link } from 'react-router-dom'
-import { Typography, Card, Input, Button, Spin, AutoComplete } from 'antd'
+import { Typography, Card, Input, Button, Checkbox, AutoComplete } from 'antd'
 import {
     mostRecentSet,
     useExercises,
@@ -60,52 +60,73 @@ const AddNewPlan = ({ planToken }: AddNewPlanProps) => {
 }
 
 interface AddNewExerciseProps {
-    plan: WorkoutPlan
+    plan?: WorkoutPlan
 }
-const AddNewExercise = ({ plan }: AddNewExerciseProps) => {
+export const AddNewExercise = ({ plan }: AddNewExerciseProps) => {
     const { data: exercises } = useExercises()
     const [name, setName] = useState('')
+    const [isBodyWeight, setIsBodyWeight] = useState(false)
     const queryClient = useQueryClient()
 
     const addExerciseMutation = useMutation(
         async () => {
-            const exercise = { name, slugName: cheapSlugify(name) }
+            const exercise = { name, slugName: cheapSlugify(name), bodyWeight: isBodyWeight }
+            const promises = []
             if (!(exercises ?? []).map(e => e.name).includes(exercise.name)) {
                 // create exercise
-                await updateExercise(exercise)
+                const exercisePromise = updateExercise(exercise)
+                promises.push(exercisePromise)
             }
-            if (!plan.exerciseNames.includes(exercise.name)) {
-                const newPlan = await updatePlan(plan.token, {
+            if (plan && !plan.exerciseNames.includes(exercise.name)) {
+                const newPlanPromise = await updatePlan(plan.token, {
                     ...plan,
                     exerciseNames: [...plan.exerciseNames, exercise.name],
                 })
-                return newPlan
+                promises.push(newPlanPromise)
             }
-            return new Promise((res, rej) => {})
+            return Promise.all(promises)
         },
         {
             onMutate: async () => {
                 await queryClient.cancelQueries(['exercises'])
-                await queryClient.cancelQueries(['plans', plan.token])
+                if (plan) {
+                    await queryClient.cancelQueries(['plans', plan.token])
+                }
             },
             onSettled: () => {
-                queryClient.invalidateQueries(['exercises'])
-                queryClient.invalidateQueries(['plans', plan.token])
                 setName('')
+                setIsBodyWeight(false)
+                queryClient.invalidateQueries(['exercises'])
+                if (plan) {
+                    queryClient.invalidateQueries(['plans', plan.token])
+                }
             },
         },
     )
 
     return (
         <Card
-            title={<Typography.Title level={4}>Add Exercise To Plan</Typography.Title>}
+            title={
+                <Typography.Title level={4}>Add Exercise{plan ? ' To Plan' : ''}</Typography.Title>
+            }
             style={{ width: '350px' }}>
+            <Checkbox
+                onChange={e => {
+                    setIsBodyWeight(e.target.checked)
+                }}
+                style={{ marginRight: '5px' }}
+                checked={isBodyWeight}
+            />
+            Bodyweight Exercise?
             <AutoComplete
                 options={exercises?.map(e => ({ value: e.name }))}
                 onSelect={(value: string) => {
                     setName(value)
                 }}>
                 <Input
+                    onPressEnter={() => {
+                        addExerciseMutation.mutate()
+                    }}
                     placeholder="Exercise Name"
                     value={name}
                     onChange={e => {

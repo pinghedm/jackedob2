@@ -20,7 +20,7 @@ const Exercise = ({}: ExerciseProps) => {
     const exerciseSlugName = location.pathname.split('/').slice(-1).pop() ?? ''
     const today = new Date().toDateString()
 
-    const plan = usePlanDetails(planToken ?? '')
+    const plan = usePlanDetails(planToken ?? 'Definitely Invalid Token')
     const thisExercise = useExerciseDetails([exerciseSlugName])?.[0]
     const newestSet = mostRecentSet(thisExercise?.sets ?? [])
     let unfinishedExercisesInPlan: ExerciseDetail[] = []
@@ -67,7 +67,7 @@ const Exercise = ({}: ExerciseProps) => {
                 {newestSet
                     ? getSetsFromSameSession(newestSet.date, thisExercise).map((s, idx) => (
                           <div key={idx}>
-                              {s.reps} @ {s.weight}
+                              {s.reps} @ {thisExercise?.bodyWeight ? 'You' : s.weight}
                           </div>
                       ))
                     : null}
@@ -85,17 +85,21 @@ const Exercise = ({}: ExerciseProps) => {
                     placeholder="Num reps"
                     onChange={val => setNewReps(val || 0)}
                 />{' '}
-                @{' '}
-                <InputNumber
-                    value={newWeight ?? ''}
-                    placeholder="Weight (lbs)"
-                    onChange={val => setNewWeight(val || 0)}
-                />
+                {thisExercise?.bodyWeight ? null : (
+                    <>
+                        @{' '}
+                        <InputNumber
+                            value={newWeight ?? ''}
+                            placeholder="Weight (lbs)"
+                            onChange={val => setNewWeight(val || 0)}
+                        />
+                    </>
+                )}
                 <Button
                     style={{ marginLeft: '15px' }}
-                    disabled={!newWeight || !newReps}
+                    disabled={(!newWeight && !thisExercise?.bodyWeight) || !newReps}
                     onClick={e => {
-                        if (!!newWeight && !!newReps) {
+                        if ((!!newWeight || thisExercise?.bodyWeight) && !!newReps) {
                             setSetsToday([
                                 ...setsToday,
                                 {

@@ -87,7 +87,7 @@ const Header = () => {
 }
 
 const App = () => {
-    const queryClient = new QueryClient()
+    const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 1000 } } })
     return (
         <QueryClientProvider client={queryClient}>
             <ActualApp />

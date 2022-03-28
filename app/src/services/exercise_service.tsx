@@ -5,10 +5,11 @@ import { collection, query, getDocs, setDoc, doc, getDoc } from 'firebase/firest
 export interface ExerciseInfo {
     name: string
     slugName: string
+    bodyWeight?: boolean
 }
 
 export interface ExerciseDetail extends ExerciseInfo {
-    sets: { weight: number; reps: number; date: string }[]
+    sets: { weight: number | null; reps: number; date: string; notes?: string }[]
 }
 
 export const useExercises = () => {
@@ -52,8 +53,8 @@ const getExerciseDetails = async (slugName: string): Promise<ExerciseDetail | nu
     const eRef = doc(db, 'exercises', slugName)
     const exerciseInfo = (await getDoc(eRef)).data() as ExerciseInfo
     const ref = doc(db, `users/${user.uid}/exercises/${slugName}`)
-    const details = ((await getDoc(ref)).data() ?? []) as ExerciseDetail
-    return { ...exerciseInfo, sets: details.sets.filter(s => !!s) }
+    const details = ((await getDoc(ref)).data() ?? {}) as ExerciseDetail
+    return { ...exerciseInfo, sets: details?.sets?.filter(s => !!s) ?? [] }
 }
 export const useExerciseDetails = (exerciseSlugNames: string[]): ExerciseDetail[] => {
     const queries = useQueries(
