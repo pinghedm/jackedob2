@@ -1,55 +1,80 @@
 import React, { useState } from 'react'
-import { useLocation, Link } from 'react-router-dom'
+import { useLocation, Link, useNavigate } from 'react-router-dom'
 import {
-    getExerciseDetails,
+    useExerciseDetails,
+    ExerciseDetail,
     mostRecentSet,
-    ExerciseInfo,
     getSetsFromSameSession,
+    updateExerciseDetails,
 } from 'services/exercise_service'
 import { usePlanDetails } from 'services/plans_service'
-import { InputNumber, Button } from 'antd'
-import { cheapSlugify } from 'services/utils'
+import { InputNumber, Button, Typography } from 'antd'
+import { useMutation, useQueryClient } from 'react-query'
 export interface ExerciseProps {}
 
 const Exercise = ({}: ExerciseProps) => {
+    const queryClient = useQueryClient()
+    const navigate = useNavigate()
     const location = useLocation() // TODO If part of a plan flow, show a 'next' button or something?
     const planToken = location.pathname.split('/').find(seg => seg.startsWith('P_'))
-    const { data: plan } = usePlanDetails(planToken ?? '')
-    const unfinishedExercisesInPlan: string[] = []
-    plan?.exerciseNames?.forEach(name => {
-        const exercise = getExerciseDetails(cheapSlugify(name))
-        if (exercise) {
-            const doneToday = getSetsFromSameSession(new Date(), exercise).length
-            if (!doneToday) {
-                unfinishedExercisesInPlan.push(name)
-            }
-        }
-    })
-
     const exerciseSlugName = location.pathname.split('/').slice(-1).pop() ?? ''
-    const exerciseInfo = getExerciseDetails(exerciseSlugName)
-    const newestSet = mostRecentSet(exerciseInfo?.sets ?? [])
+    const today = new Date().toDateString()
 
-    const [setsToday, setSetsToday] = useState<ExerciseInfo['sets']>([])
+    const plan = usePlanDetails(planToken ?? '')
+    const thisExercise = useExerciseDetails([exerciseSlugName])?.[0]
+    const newestSet = mostRecentSet(thisExercise?.sets ?? [])
+    let unfinishedExercisesInPlan: ExerciseDetail[] = []
+    if (planToken) {
+        unfinishedExercisesInPlan =
+            plan?.exercises
+                ?.filter(e => {
+                    const s = mostRecentSet(e.sets)
+                    return (s && today !== new Date(s.date).toDateString()) || !s
+                })
+                .filter(e => e.name !== thisExercise?.name) ?? []
+    }
+    const [setsToday, setSetsToday] = useState<ExerciseDetail['sets']>([])
     const [newReps, setNewReps] = useState<number | null>(null)
     const [newWeight, setNewWeight] = useState<number | null>(null)
 
+    const finishExerciseMutation = useMutation(
+        (nothing: null) =>
+            updateExerciseDetails({
+                ...thisExercise,
+                slugName: exerciseSlugName,
+                sets: [...thisExercise.sets, ...setsToday],
+            }),
+        {
+            onMutate: async () => {
+                await queryClient.cancelQueries(['exercises', thisExercise.name])
+                await queryClient.cancelQueries(['plans', planToken])
+            },
+            onSettled: () => {
+                queryClient.invalidateQueries(['exercises', thisExercise.name])
+                queryClient.invalidateQueries(['plans', planToken])
+            },
+        },
+    )
+
     return (
-        <div>
-            {exerciseInfo && newestSet ? (
-                <div>
-                    Last Time: {new Date(newestSet.date).toDateString()}
-                    <br />
-                    {getSetsFromSameSession(newestSet.date, exerciseInfo).map(s => (
-                        <div>
-                            {s.reps} @ {s.weight}
-                        </div>
-                    ))}
-                </div>
-            ) : null}
-            <div>This time, completed sets</div>
-            {setsToday.map(s => (
-                <div>
+        <div style={{ width: '95%', margin: 'auto' }}>
+            <Typography.Title level={3}>Last Time</Typography.Title>
+            <div style={{ marginBottom: '15px' }}>
+                <Typography.Text>
+                    {newestSet ? new Date(newestSet.date).toDateString() : 'No Records'}
+                </Typography.Text>
+                <br />
+                {newestSet
+                    ? getSetsFromSameSession(newestSet.date, thisExercise).map(s => (
+                          <div>
+                              {s.reps} @ {s.weight}
+                          </div>
+                      ))
+                    : null}
+            </div>
+            <Typography.Title level={3}>Today's Sets</Typography.Title>
+            {setsToday.map((s, idx) => (
+                <div key={idx}>
                     {s.reps} @ {s.weight}
                 </div>
             ))}
@@ -67,34 +92,50 @@ const Exercise = ({}: ExerciseProps) => {
                     placeholder="Weight (lbs)"
                     onChange={val => setNewWeight(val || 0)}
                 />
+                <Button
+                    style={{ marginLeft: '15px' }}
+                    disabled={!newWeight || !newReps}
+                    onClick={e => {
+                        if (!!newWeight && !!newReps) {
+                            setSetsToday([
+                                ...setsToday,
+                                {
+                                    weight: newWeight,
+                                    reps: newReps,
+                                    date: new Date().toISOString(),
+                                },
+                            ])
+                            setNewReps(0)
+                            // leave weight filled out the same, for convenience
+                        }
+                    }}>
+                    Done
+                </Button>
             </div>
             <Button
-                disabled={!newWeight || !newReps}
-                onClick={e => {
-                    if (!!newWeight && !!newReps) {
-                        setSetsToday([
-                            ...setsToday,
-                            { weight: newWeight, reps: newReps, date: new Date().toISOString() },
-                        ])
-                        setNewReps(0)
-                        // leave weight filled out the same, for convenience
-                    }
+                type="primary"
+                style={{ marginTop: '15px' }}
+                onClick={() => {
+                    finishExerciseMutation.mutate(null, {
+                        onSuccess: () => {
+                            navigate(location.pathname.split('/').slice(0, -1).join('/'))
+                        },
+                    })
                 }}>
-                Done
+                Finish
             </Button>
-            {plan
-                ? unfinishedExercisesInPlan
-                      .filter(name => name !== exerciseInfo?.name)
-                      .map(name => (
-                          <Link
-                              to={`${location.pathname.replace(
-                                  exerciseSlugName,
-                                  cheapSlugify(name),
-                              )}`}>
-                              {name}
-                          </Link>
-                      ))
-                : null}
+            {plan ? (
+                <div style={{ marginTop: '25px' }}>
+                    <Typography.Title level={4}>Next Up:</Typography.Title>
+                    {unfinishedExercisesInPlan.map(e => (
+                        <Link
+                            key={e.slugName}
+                            to={`${location.pathname.replace(exerciseSlugName, e.slugName)}`}>
+                            {e.name}
+                        </Link>
+                    ))}
+                </div>
+            ) : null}
         </div>
     )
 }

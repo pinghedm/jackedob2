@@ -1,43 +1,80 @@
-const exerciseData = [
-    {
-        name: 'Exercise 1 Name',
-        slugName: 'exercise-1-name',
-
-        sets: [
-            { weight: 15, reps: 5, date: '2022-01-01T00:00:00.000Z' },
-            { weight: 15, reps: 5, date: '2022-01-01T10:00:00.000Z' },
-            { weight: 15, reps: 5, date: '2022-01-01T20:00:00.000Z' },
-        ],
-    },
-    {
-        name: 'Exercise 2 Name',
-        slugName: 'exercise-2-name',
-
-        sets: [
-            { weight: 15, reps: 5, date: '2022-01-01T00:00:00.000Z' },
-            { weight: 15, reps: 5, date: '2022-01-01T10:00:00.000Z' },
-            { weight: 15, reps: 5, date: '2022-01-01T20:00:00.000Z' },
-        ],
-    },
-]
+import { useQuery, useQueries } from 'react-query'
+import { db, auth } from 'services/firebase'
+import { collection, query, getDocs, setDoc, doc, getDoc } from 'firebase/firestore'
 
 export interface ExerciseInfo {
     name: string
     slugName: string
+}
+
+export interface ExerciseDetail extends ExerciseInfo {
     sets: { weight: number; reps: number; date: string }[]
 }
 
-export const getExerciseDetails = (exerciseSlugName: string) => {
-    return exerciseData.find(e => e.slugName === exerciseSlugName)
+export const useExercises = () => {
+    const query = useQuery(['exercises'], getExercises)
+    return query
 }
 
-export const mostRecentSet = (sets: ExerciseInfo['sets']) =>
+const getExercises = async () => {
+    const user = auth.currentUser
+    if (user === null) {
+        return []
+    }
+    const ref = collection(db, 'exercises')
+    const q = query(ref)
+    const queryResult = await getDocs(q)
+    const exercises: ExerciseInfo[] = []
+    queryResult.forEach(d => exercises.push(d.data() as ExerciseInfo))
+    return exercises
+}
+
+export const updateExercise = async (exerciseInfo: ExerciseInfo) => {
+    await setDoc(doc(db, 'exercises', exerciseInfo.slugName), exerciseInfo)
+    return exerciseInfo
+}
+
+export const updateExerciseDetails = async (exerciseDetails: ExerciseDetail) => {
+    const user = auth.currentUser
+    if (!user) {
+        return null
+    }
+    const ref = doc(db, `users/$[user.uid}/exercises/${exerciseDetails.slugName}`)
+    await setDoc(ref, exerciseDetails)
+    return exerciseDetails
+}
+
+const getExerciseDetails = async (slugName: string): Promise<ExerciseDetail | null> => {
+    const user = auth.currentUser
+    if (!user) {
+        return null
+    }
+    const eRef = doc(db, 'exercises', slugName)
+    const exerciseInfo = (await getDoc(eRef)).data() as ExerciseInfo
+    const ref = doc(db, `users/${user.uid}/exercises/${slugName}`)
+    const sets = ((await getDoc(ref)).data() ?? []) as ExerciseDetail['sets']
+    return { ...exerciseInfo, sets: sets.filter(s => !!s) }
+}
+export const useExerciseDetails = (exerciseSlugNames: string[]): ExerciseDetail[] => {
+    const queries = useQueries(
+        exerciseSlugNames.map(name => ({
+            queryKey: ['exercises', name],
+            queryFn: () => getExerciseDetails(name),
+        })),
+    )
+    if (queries.every(q => q.status === 'success')) {
+        return queries.map(q => q.data).filter((data): data is ExerciseDetail => data !== null)
+    }
+    return []
+}
+
+export const mostRecentSet = (sets: ExerciseDetail['sets']) =>
     sets
         .sort((s1, s2) => (s1.date < s2.date ? -1 : 1))
         .slice(-1)
         .pop()
 
-export const getSetsFromSameSession = (date: Date | string, exerciseInfo: ExerciseInfo) => {
+export const getSetsFromSameSession = (date: Date | string, exerciseInfo: ExerciseDetail) => {
     // we will assume any sets on the same calendar day as date are the same session
     let ymd: string
     if (date instanceof Date) {

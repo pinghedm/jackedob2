@@ -7,8 +7,8 @@ import {
     signOut,
     connectAuthEmulator,
 } from 'firebase/auth'
-import { getFirestore, connectFirestoreEmulator, setLogLevel } from 'firebase/firestore'
-setLogLevel('debug')
+import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
+// setLogLevel('debug')
 const databaseUrl = process.env.REACT_APP_FIRESTORE_URL || '' // TODO look up what prod is
 const firebaseConfig = {
     apiKey: 'AIzaSyA1kpjSV82sGSnh0LXgrluWL3KZH8xbBb4',
