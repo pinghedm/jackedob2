@@ -175,7 +175,9 @@ const PlanDetails = ({}: PlanDetailsProps) => {
                                     <br />
                                     <Typography.Text>
                                         {newestSet
-                                            ? `${newestSet?.reps ?? 0} @ ${newestSet?.weight ?? 0}`
+                                            ? `${newestSet?.reps ?? 0} @ ${
+                                                  e?.bodyWeight ? 'You' : newestSet.weight
+                                              }`
                                             : null}
                                     </Typography.Text>
                                 </Card>

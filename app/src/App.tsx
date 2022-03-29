@@ -103,7 +103,13 @@ const ActualApp = () => {
         <BrowserRouter basename={baseName ? baseName : undefined}>
             <Layout>
                 <Header />
-                <Layout.Content style={{ padding: '0 25px', minHeight: '90vh', width: '90vw' }}>
+                <Layout.Content
+                    style={{
+                        padding: '0 25px',
+                        minHeight: '90vh',
+                        width: '90vw',
+                        marginBottom: '10px',
+                    }}>
                     <BreadCrumbs />
                     <Routes>
                         <Route path="/">
