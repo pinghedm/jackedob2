@@ -91,6 +91,7 @@ const Exercise = ({}: ExerciseProps) => {
                 }}>
                 <div>
                     <InputNumber
+                        type="number"
                         style={{
                             width: '175px',
                             height: '100px',
@@ -110,6 +111,7 @@ const Exercise = ({}: ExerciseProps) => {
                     <>
                         <div style={{ marginLeft: '5px' }}>
                             <InputNumber
+                                type="number"
                                 style={{
                                     width: '175px',
                                     height: '100px',
