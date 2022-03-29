@@ -2,14 +2,8 @@ import React, { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { usePlanDetails, updatePlan, WorkoutPlan } from 'services/plans_service'
 import { Link } from 'react-router-dom'
-import { Typography, Card, Input, Button, Checkbox, AutoComplete } from 'antd'
-import {
-    mostRecentSet,
-    useExercises,
-    ExerciseInfo,
-    updateExercise,
-    ExerciseDetail,
-} from 'services/exercise_service'
+import { Typography, Card, Input, Button, Checkbox, AutoComplete, Row, Col } from 'antd'
+import { mostRecentSet, useExercises, updateExercise } from 'services/exercise_service'
 import { useMutation, useQueryClient } from 'react-query'
 import { cheapSlugify } from 'services/utils'
 
@@ -34,28 +28,32 @@ const AddNewPlan = ({ planToken }: AddNewPlanProps) => {
     )
 
     return (
-        <Card style={{ width: '50%', margin: 'auto', marginTop: '10%' }}>
-            <Typography.Title level={3}>Add New Plan</Typography.Title>
-            <Input
-                placeholder="Plan Name"
-                value={name}
-                onChange={e => {
-                    setName(e.target.value)
-                }}
-                onPressEnter={e => {
-                    createPlanMutation.mutate(name)
-                }}
-            />
-            <Button
-                onClick={() => {
-                    createPlanMutation.mutate(name)
-                }}
-                type="primary"
-                style={{ marginTop: '10px' }}
-                disabled={!name}>
-                Create
-            </Button>
-        </Card>
+        <Row gutter={[16, 16]}>
+            <Col xs={{ span: 24 }} lg={{ span: 6 }}>
+                <Card>
+                    <Typography.Title level={3}>Add New Plan</Typography.Title>
+                    <Input
+                        placeholder="Plan Name"
+                        value={name}
+                        onChange={e => {
+                            setName(e.target.value)
+                        }}
+                        onPressEnter={e => {
+                            createPlanMutation.mutate(name)
+                        }}
+                    />
+                    <Button
+                        onClick={() => {
+                            createPlanMutation.mutate(name)
+                        }}
+                        type="primary"
+                        style={{ marginTop: '10px' }}
+                        disabled={!name}>
+                        Create
+                    </Button>
+                </Card>
+            </Col>
+        </Row>
     )
 }
 
@@ -108,40 +106,44 @@ export const AddNewExercise = ({ plan }: AddNewExerciseProps) => {
         <Card
             title={
                 <Typography.Title level={4}>Add Exercise{plan ? ' To Plan' : ''}</Typography.Title>
-            }
-            style={{ width: '350px' }}>
-            <Checkbox
-                onChange={e => {
-                    setIsBodyWeight(e.target.checked)
-                }}
-                style={{ marginRight: '5px' }}
-                checked={isBodyWeight}
-            />
-            Bodyweight Exercise?
-            <AutoComplete
-                value={name}
-                options={exercises?.map(e => ({ value: e.name }))}
-                onChange={value => {
-                    setName(value)
-                }}
-                onSelect={(value: string) => {
-                    setName(value)
-                }}>
-                <Input
-                    onPressEnter={() => {
-                        addExerciseMutation.mutate()
+            }>
+            <div>
+                <Checkbox
+                    onChange={e => {
+                        setIsBodyWeight(e.target.checked)
                     }}
-                    placeholder="Exercise Name"
+                    style={{ marginRight: '5px' }}
+                    checked={isBodyWeight}
                 />
-            </AutoComplete>
-            <Button
-                type="primary"
-                style={{ marginTop: '10px' }}
-                onClick={() => {
-                    addExerciseMutation.mutate()
-                }}>
-                Add
-            </Button>
+                Bodyweight Exercise?
+            </div>
+            <div>
+                <AutoComplete
+                    value={name}
+                    options={exercises?.map(e => ({ value: e.name }))}
+                    onChange={value => {
+                        setName(value)
+                    }}
+                    onSelect={(value: string) => {
+                        setName(value)
+                    }}>
+                    <Input
+                        onPressEnter={() => {
+                            addExerciseMutation.mutate()
+                        }}
+                        placeholder="Exercise Name"
+                    />
+                </AutoComplete>
+                <Button
+                    disabled={!name}
+                    type="primary"
+                    style={{ marginTop: '10px' }}
+                    onClick={() => {
+                        addExerciseMutation.mutate()
+                    }}>
+                    Add
+                </Button>
+            </div>
         </Card>
     )
 }
@@ -158,30 +160,35 @@ const PlanDetails = ({}: PlanDetailsProps) => {
     return (
         <>
             <Typography.Title>{plan.name}</Typography.Title>
-            {plan.exercises.map(e => {
-                const newestSet = mostRecentSet(e.sets)
-                return (
-                    <Link
-                        key={e.name}
-                        to={`/plans/${plan.token}/${e.slugName}`}
-                        style={{ display: 'inline-block', width: '350px' }}>
-                        <Card title={e.name}>
-                            Last Data:{' '}
-                            {newestSet
-                                ? new Date(newestSet?.date ?? '').toDateString()
-                                : 'No Records'}
-                            <br />
-                            <br />
-                            <Typography.Text>
-                                {newestSet
-                                    ? `${newestSet?.reps ?? 0} @ ${newestSet?.weight ?? 0}`
-                                    : null}
-                            </Typography.Text>
-                        </Card>
-                    </Link>
-                )
-            })}
-            <AddNewExercise plan={plan} />
+            <Row gutter={[16, 16]}>
+                {plan.exercises.map(e => {
+                    const newestSet = mostRecentSet(e.sets)
+                    return (
+                        <Col xs={{ span: 24 }} lg={{ span: 6 }} key={e.name}>
+                            <Link to={`/plans/${plan.token}/${e.slugName}`}>
+                                <Card title={e.name}>
+                                    Last Data:{' '}
+                                    {newestSet
+                                        ? new Date(newestSet?.date ?? '').toDateString()
+                                        : 'No Records'}
+                                    <br />
+                                    <br />
+                                    <Typography.Text>
+                                        {newestSet
+                                            ? `${newestSet?.reps ?? 0} @ ${newestSet?.weight ?? 0}`
+                                            : null}
+                                    </Typography.Text>
+                                </Card>
+                            </Link>
+                        </Col>
+                    )
+                })}
+            </Row>
+            <Row style={{ marginTop: '32px' }}>
+                <Col xs={{ span: 24 }} lg={{ span: 8, offset: 8 }}>
+                    <AddNewExercise plan={plan} />
+                </Col>
+            </Row>
         </>
     )
 }

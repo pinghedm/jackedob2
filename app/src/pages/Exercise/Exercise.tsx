@@ -8,7 +8,7 @@ import {
     updateExerciseDetails,
 } from 'services/exercise_service'
 import { usePlanDetails } from 'services/plans_service'
-import { InputNumber, Button, Typography } from 'antd'
+import { InputNumber, Button, Typography, List } from 'antd'
 import { useMutation, useQueryClient } from 'react-query'
 export interface ExerciseProps {}
 
@@ -57,7 +57,7 @@ const Exercise = ({}: ExerciseProps) => {
     )
 
     return (
-        <div style={{ width: '95%', margin: 'auto' }}>
+        <div style={{ width: '100%' }}>
             <Typography.Title level={3}>Last Time</Typography.Title>
             <div style={{ marginBottom: '15px' }}>
                 <Typography.Text>
@@ -66,43 +66,71 @@ const Exercise = ({}: ExerciseProps) => {
                 <br />
                 {newestSet
                     ? getSetsFromSameSession(newestSet.date, thisExercise).map((s, idx) => (
-                          <div key={idx}>
+                          <div key={idx} style={{ fontSize: '32px' }}>
                               {s.reps} @ {thisExercise?.bodyWeight ? 'You' : s.weight}
                           </div>
                       ))
                     : null}
             </div>
             <Typography.Title level={3}>Today's Sets</Typography.Title>
-            {setsToday.map((s, idx) => (
-                <div key={idx}>
-                    {s.reps} @ {thisExercise?.bodyWeight ? 'You' : s.weight}
+            <List>
+                {setsToday.map((s, idx) => (
+                    <List.Item key={idx} style={{ fontSize: '32px' }}>
+                        {idx + 1}) {s.reps} @ {thisExercise?.bodyWeight ? 'You' : s.weight}
+                    </List.Item>
+                ))}
+            </List>
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    maxWidth: '450px',
+                    height: '100px',
+                }}>
+                <div>
+                    <InputNumber
+                        style={{
+                            width: '175px',
+                            height: '100px',
+                            fontSize: '28px',
+                            lineHeight: '100px',
+                        }}
+                        onClick={e => {
+                            setNewReps(null)
+                        }}
+                        autoFocus
+                        value={newReps ?? ''}
+                        placeholder="Num reps"
+                        onChange={val => setNewReps(val || 0)}
+                    />
                 </div>
-            ))}
-            <div>
-                <InputNumber
-                    onClick={e => {
-                        setNewReps(null)
-                    }}
-                    autoFocus
-                    value={newReps ?? ''}
-                    placeholder="Num reps"
-                    onChange={val => setNewReps(val || 0)}
-                />{' '}
                 {thisExercise?.bodyWeight ? null : (
                     <>
-                        @{' '}
-                        <InputNumber
-                            onClick={e => {
-                                setNewWeight(null)
-                            }}
-                            value={newWeight ?? ''}
-                            placeholder="Weight (lbs)"
-                            onChange={val => setNewWeight(val || 0)}
-                        />
+                        <div style={{ marginLeft: '5px' }}>
+                            <InputNumber
+                                style={{
+                                    width: '175px',
+                                    height: '100px',
+                                    fontSize: '28px',
+                                    lineHeight: '100px',
+                                }}
+                                onClick={e => {
+                                    setNewWeight(null)
+                                }}
+                                value={newWeight ?? ''}
+                                placeholder="Weight (lbs)"
+                                onChange={val => setNewWeight(val || 0)}
+                            />
+                        </div>
                     </>
                 )}
+            </div>
+            <div style={{ width: '100%', maxWidth: '450px' }}>
                 <Button
-                    style={{ marginLeft: '15px' }}
+                    type="primary"
+                    style={{ width: '100%', height: '50px' }}
                     disabled={(!newWeight && !thisExercise?.bodyWeight) || !newReps}
                     onClick={e => {
                         if ((!!newWeight || thisExercise?.bodyWeight) && !!newReps) {
@@ -118,12 +146,11 @@ const Exercise = ({}: ExerciseProps) => {
                             // leave weight filled out the same, for convenience
                         }
                     }}>
-                    Done
+                    Record Set
                 </Button>
             </div>
             <Button
-                type="primary"
-                style={{ marginTop: '15px' }}
+                style={{ marginTop: '35px', width: '100%', height: '50px', maxWidth: '450px' }}
                 onClick={() => {
                     finishExerciseMutation.mutate(null, {
                         onSuccess: () => {
@@ -131,16 +158,27 @@ const Exercise = ({}: ExerciseProps) => {
                         },
                     })
                 }}>
-                Finish
+                Finish Exercise
             </Button>
-            {plan ? (
+            {plan?.token ? (
                 <div style={{ marginTop: '25px' }}>
                     <Typography.Title level={4}>Next Up:</Typography.Title>
                     {unfinishedExercisesInPlan.map(e => (
                         <Link
                             key={e.slugName}
                             to={`${location.pathname.replace(exerciseSlugName, e.slugName)}`}>
-                            {e.name}
+                            <Button
+                                type="link"
+                                style={{
+                                    lineHeight: '24px',
+                                    fontSize: '24px',
+                                    marginLeft: '10px',
+                                    paddingTop: '15px',
+                                    paddingBottom: '15px',
+                                    height: '100%',
+                                }}>
+                                {e.name}
+                            </Button>
                         </Link>
                     ))}
                 </div>

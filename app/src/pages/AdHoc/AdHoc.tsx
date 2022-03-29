@@ -1,6 +1,6 @@
 import React from 'react'
 import { useExercises, ExerciseInfo } from 'services/exercise_service'
-import { Card, Typography, Checkbox } from 'antd'
+import { Card, Typography, Row, Col } from 'antd'
 import { Link } from 'react-router-dom'
 import { AddNewExercise } from 'pages/PlanDetails/PlanDetails'
 
@@ -9,19 +9,13 @@ interface ExerciseCardProps {
 }
 const ExerciseCard = ({ exercise }: ExerciseCardProps) => {
     return (
-        <Link
-            key={exercise.name}
-            to={`/exercise/${exercise.slugName}`}
-            style={{ display: 'inline-block', width: '350px', margin: '25px' }}>
-            <Card title={exercise.name}>
-                <Checkbox
-                    disabled={true}
-                    style={{ marginRight: '5px' }}
-                    checked={exercise?.bodyWeight ?? false}
-                />
-                Body Weight Exercise
-            </Card>
-        </Link>
+        <Col xs={{ span: 24 }} lg={{ span: 6 }}>
+            <Link key={exercise.name} to={`/exercise/${exercise.slugName}`}>
+                <Card>
+                    <Typography.Title level={4}>{exercise.name}</Typography.Title>
+                </Card>
+            </Link>
+        </Col>
     )
 }
 
@@ -31,14 +25,20 @@ const AdHoc = ({}: AdHocProps) => {
     const { data: exercises } = useExercises()
 
     return (
-        <div style={{ width: '90%', margin: 'auto', marginBottom: '25px' }}>
+        <div>
             <Typography.Title>Choose Exercise</Typography.Title>
-            {exercises
-                ?.sort((a, b) => a.name.localeCompare(b.name))
-                ?.map(e => (
-                    <ExerciseCard exercise={e} key={e.slugName} />
-                ))}
-            <AddNewExercise />
+            <Row gutter={[16, 16]}>
+                {exercises
+                    ?.sort((a, b) => a.name.localeCompare(b.name))
+                    ?.map(e => (
+                        <ExerciseCard exercise={e} key={e.slugName} />
+                    ))}
+            </Row>
+            <Row style={{ marginTop: '32px' }}>
+                <Col xs={{ span: 24 }} lg={{ span: 8, offset: 8 }}>
+                    <AddNewExercise />
+                </Col>
+            </Row>
         </div>
     )
 }

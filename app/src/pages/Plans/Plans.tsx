@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography, Card, Button } from 'antd'
+import { Typography, Card, Button, Row, Col } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { usePlans } from 'services/plans_service'
 import { Link } from 'react-router-dom'
@@ -11,37 +11,33 @@ const Plans = ({}: PlansProps) => {
     return (
         <>
             <Typography.Title>Saved Plans</Typography.Title>
-            <div style={{ width: '600px', margin: 'auto' }}>
+            <Row gutter={[16, 16]}>
                 {plans?.map(plan => (
-                    <Link
-                        to={plan.token}
-                        key={plan.token}
-                        style={{ display: 'inline-block', width: '350px' }}>
-                        <Card
-                            title={plan.name}
-                            style={{ maxWidth: '350px', marginTop: '15px' }}
-                            key={plan.token}>
-                            {plan.exerciseNames.length} exercises.
-                        </Card>
-                    </Link>
+                    <Col xs={{ span: 24 }} lg={{ span: 6 }} key={plan.token}>
+                        <Link to={plan.token}>
+                            <Card
+                                title={<Typography.Title level={5}>{plan.name}</Typography.Title>}
+                                key={plan.token}>
+                                <Typography.Text>
+                                    {plan.exerciseNames.length} exercises
+                                </Typography.Text>
+                            </Card>
+                        </Link>
+                    </Col>
                 ))}
-                <Button
-                    onClick={() => {}}
-                    type="link"
-                    style={{
-                        width: '350px',
-                        margin: 'auto',
-                        marginTop: '15px',
-                        display: 'inline-block',
-                    }}>
-                    <Link to={genPlanToken()}>
-                        <Card style={{ color: 'green' }}>
-                            <PlusOutlined />
-                            Add new plan
-                        </Card>
-                    </Link>
-                </Button>
-            </div>
+            </Row>
+            <Row style={{ marginTop: '32px' }}>
+                <Col xs={{ span: 24 }} lg={{ span: 8, offset: 8 }}>
+                    <Button onClick={() => {}} type="link" style={{ width: '100%' }}>
+                        <Link to={genPlanToken()}>
+                            <Card style={{ color: 'green' }}>
+                                <PlusOutlined />
+                                Add new plan
+                            </Card>
+                        </Link>
+                    </Button>
+                </Col>
+            </Row>
         </>
     )
 }
