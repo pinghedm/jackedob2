@@ -102,9 +102,9 @@ const History = ({}: HistoryProps) => {
                                 <Card title={e.name}>
                                     <Row>
                                         {Object.entries(setsByDate)
-                                            .sort((t1, t2) => t1[0].localeCompare(t2[0]))
+                                            .sort((t1, t2) => -1 * t1[0].localeCompare(t2[0]))
                                             .map(([date, sets]) => (
-                                                <Col xs={{ span: 12 }} lg={{ span: 8 }} key={date}>
+                                                <Col xs={{ span: 12 }} lg={{ span: 12 }} key={date}>
                                                     <Card title={date}>
                                                         {sets.map((s, idx) => (
                                                             <div key={idx}>
