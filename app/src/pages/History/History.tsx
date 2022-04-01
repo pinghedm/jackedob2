@@ -29,7 +29,7 @@ const History = ({}: HistoryProps) => {
     const [searchDateString, setSearchDateString] = useState('')
     const datesWithSets = exerciseDetails
         .flatMap(e => e.sets.map(s => s.date))
-        .map(d => moment(d).toISOString().split('T')[0])
+        .map(d => moment(d).toDate().toLocaleDateString())
     return (
         <>
             <Typography.Title level={3}>View History</Typography.Title>
@@ -66,7 +66,7 @@ const History = ({}: HistoryProps) => {
                     <DatePicker
                         dateRender={current => {
                             const dateHasSets = datesWithSets.includes(
-                                current.toDate().toISOString().split('T')[0],
+                                current.toDate().toLocaleDateString(),
                             )
                             return (
                                 <div
@@ -81,9 +81,7 @@ const History = ({}: HistoryProps) => {
                             )
                         }}
                         onChange={(date, dateString) => {
-                            setSearchDateString(
-                                date?.toDate()?.toISOString()?.split('T')?.[0] ?? '',
-                            )
+                            setSearchDateString(date?.toDate()?.toLocaleDateString() ?? '')
                         }}
                     />
                 </div>
@@ -93,7 +91,12 @@ const History = ({}: HistoryProps) => {
                     .sort((e1, e2) => e1.name.localeCompare(e2.name))
                     .map((e, i) => {
                         const setsByDate = e.sets.reduce((memo, set) => {
-                            const date = moment(set.date).toDate().toDateString()
+                            const date = moment(set.date).toDate().toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                            })
                             memo[date] = [...(memo?.[date] ?? []), set]
                             return memo
                         }, {} as Record<string, ExerciseDetail['sets']>)

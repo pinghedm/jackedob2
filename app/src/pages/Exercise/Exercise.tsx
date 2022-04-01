@@ -61,7 +61,14 @@ const Exercise = ({}: ExerciseProps) => {
             <Typography.Title level={3}>Last Time</Typography.Title>
             <div style={{ marginBottom: '15px' }}>
                 <Typography.Text>
-                    {newestSet ? new Date(newestSet.date).toDateString() : 'No Records'}
+                    {newestSet
+                        ? new Date(newestSet.date).toLocaleDateString('en-US', {
+                              weekday: 'short',
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                          })
+                        : 'No Records'}
                 </Typography.Text>
                 <br />
                 {newestSet

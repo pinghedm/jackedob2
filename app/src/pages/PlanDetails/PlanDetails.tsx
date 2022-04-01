@@ -186,7 +186,15 @@ const PlanDetails = ({}: PlanDetailsProps) => {
                                     <Card title={e.name}>
                                         Last Data:{' '}
                                         {newestSet
-                                            ? new Date(newestSet?.date ?? '').toDateString()
+                                            ? new Date(newestSet?.date ?? '').toLocaleDateString(
+                                                  'en-US',
+                                                  {
+                                                      weekday: 'short',
+                                                      year: 'numeric',
+                                                      month: 'long',
+                                                      day: 'numeric',
+                                                  },
+                                              )
                                             : 'No Records'}
                                         <br />
                                         <br />
