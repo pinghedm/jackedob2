@@ -14,7 +14,7 @@ const getReducedExerciseDetails = (
         .filter(e => e.name.includes(searchString))
         .map(e => {
             const reducedSets = e.sets.filter(s =>
-                moment(s.date).toDate().toISOString().includes(searchDate),
+                moment(s.date).toDate().toLocaleDateString().includes(searchDate),
             )
             return { ...e, sets: reducedSets }
         })
