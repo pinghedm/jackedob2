@@ -20,7 +20,12 @@ export const updatePlan = async (planToken: string, planData: WorkoutPlan) => {
         return {}
     }
     const now = new Date()
-    const newPlanInfo = { ...planData, token: planToken, lastUpdated: now.toISOString() }
+    const newPlanInfo = {
+        name: planData.name,
+        exerciseNames: planData.exerciseNames,
+        token: planToken,
+        lastUpdated: now.toISOString(),
+    }
     try {
         await setDoc(doc(db, `users/${user.uid}/plans`, planToken), newPlanInfo)
         return newPlanInfo
