@@ -119,6 +119,7 @@ export const AddNewExercise = ({ plan }: AddNewExerciseProps) => {
             </div>
             <div>
                 <AutoComplete
+                    filterOption={true}
                     value={name}
                     options={exercises?.map(e => ({ value: e.name }))}
                     onChange={value => {
@@ -161,30 +162,46 @@ const PlanDetails = ({}: PlanDetailsProps) => {
         <>
             <Typography.Title>{plan.name}</Typography.Title>
             <Row gutter={[16, 16]}>
-                {plan.exercises.map(e => {
-                    const newestSet = mostRecentSet(e.sets)
-                    return (
-                        <Col xs={{ span: 24 }} lg={{ span: 6 }} key={e.name}>
-                            <Link to={`/plans/${plan.token}/${e.slugName}`}>
-                                <Card title={e.name}>
-                                    Last Data:{' '}
-                                    {newestSet
-                                        ? new Date(newestSet?.date ?? '').toDateString()
-                                        : 'No Records'}
-                                    <br />
-                                    <br />
-                                    <Typography.Text>
+                {plan.exercises
+                    .sort((e1, e2) => {
+                        const e1Newest = mostRecentSet(e1.sets)
+                        const e2Newest = mostRecentSet(e2.sets)
+                        if (!!e2Newest && !e1Newest) {
+                            return -1
+                        } else if (!!e1Newest && !e2Newest) {
+                            return 1
+                        } else if (!e1Newest && !e2Newest) {
+                            return e1.name.localeCompare(e2.name)
+                        }
+                        return (
+                            new Date(e1Newest?.date ?? 1).getTime() -
+                            new Date(e2Newest?.date ?? 1).getTime()
+                        )
+                    })
+                    .map(e => {
+                        const newestSet = mostRecentSet(e.sets)
+                        return (
+                            <Col xs={{ span: 24 }} lg={{ span: 6 }} key={e.name}>
+                                <Link to={`/plans/${plan.token}/${e.slugName}`}>
+                                    <Card title={e.name}>
+                                        Last Data:{' '}
                                         {newestSet
-                                            ? `${newestSet?.reps ?? 0} @ ${
-                                                  e?.bodyWeight ? 'You' : newestSet.weight
-                                              }`
-                                            : null}
-                                    </Typography.Text>
-                                </Card>
-                            </Link>
-                        </Col>
-                    )
-                })}
+                                            ? new Date(newestSet?.date ?? '').toDateString()
+                                            : 'No Records'}
+                                        <br />
+                                        <br />
+                                        <Typography.Text>
+                                            {newestSet
+                                                ? `${newestSet?.reps ?? 0} @ ${
+                                                      e?.bodyWeight ? 'You' : newestSet.weight
+                                                  }`
+                                                : null}
+                                        </Typography.Text>
+                                    </Card>
+                                </Link>
+                            </Col>
+                        )
+                    })}
             </Row>
             <Row style={{ marginTop: '32px' }}>
                 <Col xs={{ span: 24 }} lg={{ span: 8, offset: 8 }}>
