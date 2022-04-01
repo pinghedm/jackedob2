@@ -166,22 +166,27 @@ const Exercise = ({}: ExerciseProps) => {
                 <div style={{ marginTop: '25px' }}>
                     <Typography.Title level={4}>Next Up:</Typography.Title>
                     {unfinishedExercisesInPlan.map(e => (
-                        <Link
-                            key={e.slugName}
-                            to={`${location.pathname.replace(exerciseSlugName, e.slugName)}`}>
-                            <Button
-                                type="link"
-                                style={{
-                                    lineHeight: '24px',
-                                    fontSize: '24px',
-                                    marginLeft: '10px',
-                                    paddingTop: '15px',
-                                    paddingBottom: '15px',
-                                    height: '100%',
-                                }}>
-                                {e.name}
-                            </Button>
-                        </Link>
+                        <Button
+                            onClick={() => {
+                                finishExerciseMutation.mutate(null, {
+                                    onSuccess: () => {
+                                        navigate(
+                                            location.pathname.replace(exerciseSlugName, e.slugName),
+                                        )
+                                    },
+                                })
+                            }}
+                            type="link"
+                            style={{
+                                lineHeight: '24px',
+                                fontSize: '24px',
+                                marginLeft: '10px',
+                                paddingTop: '15px',
+                                paddingBottom: '15px',
+                                height: '100%',
+                            }}>
+                            {e.name}
+                        </Button>
                     ))}
                 </div>
             ) : null}
