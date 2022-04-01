@@ -45,22 +45,25 @@ export const updateExerciseDetails = async (exerciseDetails: ExerciseDetail) => 
     return exerciseDetails
 }
 
-const getExerciseDetails = async (slugName: string): Promise<ExerciseDetail | null> => {
+const getExerciseDetails = async (
+    slugName: string,
+    uid?: string,
+): Promise<ExerciseDetail | null> => {
     const user = auth.currentUser
     if (!user) {
         return null
     }
     const eRef = doc(db, 'exercises', slugName)
     const exerciseInfo = (await getDoc(eRef)).data() as ExerciseInfo
-    const ref = doc(db, `users/${user.uid}/exercises/${slugName}`)
+    const ref = doc(db, `users/${uid ?? user.uid}/exercises/${slugName}`)
     const details = ((await getDoc(ref)).data() ?? {}) as ExerciseDetail
     return { ...exerciseInfo, sets: details?.sets?.filter(s => !!s) ?? [] }
 }
-export const useExerciseDetails = (exerciseSlugNames: string[]): ExerciseDetail[] => {
+export const useExerciseDetails = (exerciseSlugNames: string[], uid?: string): ExerciseDetail[] => {
     const queries = useQueries(
         exerciseSlugNames.map(name => ({
             queryKey: ['exercises', name],
-            queryFn: () => getExerciseDetails(name),
+            queryFn: () => getExerciseDetails(name, uid),
         })),
     )
     if (queries.every(q => q.status === 'success')) {

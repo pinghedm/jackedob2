@@ -15,6 +15,7 @@ import LoginPage from 'pages/LoginPage/LoginPage.lazy'
 import { logout } from 'services/firebase'
 import { usePlans, WorkoutPlan } from 'services/plans_service'
 import History from 'pages/History/History.lazy'
+import Social from 'pages/Social/Social.lazy'
 type MenuOptions = 'ad-hoc' | 'plans'
 const Header = () => {
     const location = useLocation()
@@ -36,6 +37,9 @@ const Header = () => {
                 </Menu.Item>
                 <Menu.Item key="history">
                     <Link to="history">History</Link>
+                </Menu.Item>
+                <Menu.Item key="spy">
+                    <Link to="social">Social</Link>
                 </Menu.Item>
                 <Menu.Item
                     style={{ marginLeft: 'auto' }}
@@ -125,6 +129,7 @@ const ActualApp = () => {
                             <Route path="exercise/:name" element={<Exercise />} />
                             <Route path="exercise" element={<Navigate replace to="/" />}></Route>
                             <Route path="history" element={<History />} />
+                            <Route path="social" element={<Social />} />
                         </Route>
                     </Routes>
                 </Layout.Content>

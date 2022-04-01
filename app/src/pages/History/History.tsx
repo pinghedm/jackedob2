@@ -3,8 +3,6 @@ import { useExercises, useExerciseDetails, ExerciseDetail } from 'services/exerc
 import { Input, AutoComplete, DatePicker, Typography, Card, Row, Col } from 'antd'
 import moment from 'moment'
 
-export interface HistoryProps {}
-
 const getReducedExerciseDetails = (
     exerciseDetails: ExerciseDetail[],
     searchString: string,
@@ -22,9 +20,12 @@ const getReducedExerciseDetails = (
     return reducedExercises
 }
 
-const History = ({}: HistoryProps) => {
+export interface HistoryProps {
+    uid?: string
+}
+const History = ({ uid }: HistoryProps) => {
     const { data: exercises } = useExercises()
-    const exerciseDetails = useExerciseDetails(exercises?.map(e => e.slugName) ?? [])
+    const exerciseDetails = useExerciseDetails(exercises?.map(e => e.slugName) ?? [], uid)
     const [exerciseSearch, setExerciseSearch] = useState('')
     const [searchDateString, setSearchDateString] = useState('')
     const datesWithSets = exerciseDetails
