@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useExercises, useExerciseDetails, ExerciseDetail } from 'services/exercise_service'
-import { Input, AutoComplete, DatePicker, Typography } from 'antd'
+import { Input, AutoComplete, DatePicker, Typography, Card, Row, Col } from 'antd'
 import moment from 'moment'
 
 export interface HistoryProps {}
@@ -88,11 +88,39 @@ const History = ({}: HistoryProps) => {
                     />
                 </div>
             </div>
-            {getReducedExerciseDetails(exerciseDetails, exerciseSearch, searchDateString).map(
-                (e, i) => (
-                    <div key={i}>{JSON.stringify(e)}</div>
-                ),
-            )}
+            <Row gutter={[16, 16]}>
+                {getReducedExerciseDetails(exerciseDetails, exerciseSearch, searchDateString)
+                    .sort((e1, e2) => e1.name.localeCompare(e2.name))
+                    .map((e, i) => {
+                        const setsByDate = e.sets.reduce((memo, set) => {
+                            const date = moment(set.date).toDate().toDateString()
+                            memo[date] = [...(memo?.[date] ?? []), set]
+                            return memo
+                        }, {} as Record<string, ExerciseDetail['sets']>)
+                        return (
+                            <Col xs={{ span: 24 }} lg={{ span: 8 }} key={e.slugName}>
+                                <Card title={e.name}>
+                                    <Row>
+                                        {Object.entries(setsByDate)
+                                            .sort((t1, t2) => t1[0].localeCompare(t2[0]))
+                                            .map(([date, sets]) => (
+                                                <Col xs={{ span: 12 }} lg={{ span: 8 }} key={date}>
+                                                    <Card title={date}>
+                                                        {sets.map((s, idx) => (
+                                                            <div key={idx}>
+                                                                {s.reps} @{' '}
+                                                                {e.bodyWeight ? 'you' : s.weight}
+                                                            </div>
+                                                        ))}
+                                                    </Card>
+                                                </Col>
+                                            ))}
+                                    </Row>
+                                </Card>
+                            </Col>
+                        )
+                    })}
+            </Row>
         </>
     )
 }
