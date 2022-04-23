@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useLocation, Link, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
     useExerciseDetails,
     ExerciseDetail,
@@ -9,6 +9,7 @@ import {
 } from 'services/exercise_service'
 import { usePlanDetails } from 'services/plans_service'
 import { InputNumber, Button, Typography, List } from 'antd'
+import { CloseOutlined } from '@ant-design/icons'
 import { useMutation, useQueryClient } from 'react-query'
 export interface ExerciseProps {}
 
@@ -33,7 +34,9 @@ const Exercise = ({}: ExerciseProps) => {
                 })
                 .filter(e => e.name !== thisExercise?.name) ?? []
     }
-    const [setsToday, setSetsToday] = useState<ExerciseDetail['sets']>([])
+    const [setsToday, setSetsToday] = useState<ExerciseDetail['sets']>(
+        JSON.parse(window.sessionStorage.getItem(exerciseSlugName) || '[]'),
+    )
     const [newReps, setNewReps] = useState<number | null>(null)
     const [newWeight, setNewWeight] = useState<number | null>(null)
 
@@ -83,7 +86,20 @@ const Exercise = ({}: ExerciseProps) => {
             <List>
                 {setsToday.map((s, idx) => (
                     <List.Item key={idx} style={{ fontSize: '32px' }}>
-                        {idx + 1}) {s.reps} @ {thisExercise?.bodyWeight ? 'You' : s.weight}
+                        <div style={{ display: 'flex', flexDirection: 'row', gap: '5px' }}>
+                            {idx + 1}) {s.reps} @ {thisExercise?.bodyWeight ? 'You' : s.weight}
+                            <Button
+                                style={{ height: '50px', width: '50px' }}
+                                icon={<CloseOutlined />}
+                                onClick={() => {
+                                    const newSetsToday = setsToday.filter((s, i) => i !== idx)
+                                    setSetsToday(newSetsToday)
+                                    window.sessionStorage.setItem(
+                                        exerciseSlugName,
+                                        JSON.stringify(newSetsToday),
+                                    )
+                                }}></Button>
+                        </div>
                     </List.Item>
                 ))}
             </List>
@@ -115,27 +131,26 @@ const Exercise = ({}: ExerciseProps) => {
                     />
                 </div>
                 {thisExercise?.bodyWeight ? null : (
-                    <>
-                        <div style={{ marginLeft: '5px' }}>
-                            <InputNumber
-                                type="number"
-                                style={{
-                                    width: '175px',
-                                    height: '100px',
-                                    fontSize: '28px',
-                                    lineHeight: '100px',
-                                }}
-                                onClick={e => {
-                                    setNewWeight(null)
-                                }}
-                                value={newWeight ?? ''}
-                                placeholder="Weight (lbs)"
-                                onChange={val => setNewWeight(val || 0)}
-                            />
-                        </div>
-                    </>
+                    <div style={{ marginLeft: '5px' }}>
+                        <InputNumber
+                            type="number"
+                            style={{
+                                width: '175px',
+                                height: '100px',
+                                fontSize: '28px',
+                                lineHeight: '100px',
+                            }}
+                            onClick={e => {
+                                setNewWeight(null)
+                            }}
+                            value={newWeight ?? ''}
+                            placeholder="Weight (lbs)"
+                            onChange={val => setNewWeight(val || 0)}
+                        />
+                    </div>
                 )}
             </div>
+
             <div style={{ width: '100%', maxWidth: '450px' }}>
                 <Button
                     type="primary"
@@ -143,16 +158,21 @@ const Exercise = ({}: ExerciseProps) => {
                     disabled={(!newWeight && !thisExercise?.bodyWeight) || !newReps}
                     onClick={e => {
                         if ((!!newWeight || thisExercise?.bodyWeight) && !!newReps) {
-                            setSetsToday([
+                            const newSetsToday = [
                                 ...setsToday,
                                 {
                                     weight: newWeight,
                                     reps: newReps,
                                     date: new Date().toISOString(),
                                 },
-                            ])
+                            ]
+                            setSetsToday(newSetsToday)
                             setNewReps(0)
                             // leave weight filled out the same, for convenience
+                            window.sessionStorage.setItem(
+                                exerciseSlugName,
+                                JSON.stringify(newSetsToday),
+                            )
                         }
                     }}>
                     Record Set
@@ -166,6 +186,7 @@ const Exercise = ({}: ExerciseProps) => {
                             navigate(location.pathname.split('/').slice(0, -1).join('/'))
                         },
                     })
+                    window.sessionStorage.removeItem(exerciseSlugName)
                 }}>
                 Finish Exercise
             </Button>
