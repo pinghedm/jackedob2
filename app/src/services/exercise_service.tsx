@@ -82,5 +82,5 @@ export const mostRecentSet = (sets: ExerciseDetail['sets']) =>
 export const getSetsFromSameSession = (date: Date | string, exerciseInfo: ExerciseDetail) => {
     // we will assume any sets on the same calendar day as date are the same session
     const ymd = moment(date).format('YYYYMMDD')
-    return exerciseInfo.sets.filter(s => moment(date).format('YYYYMMDD') === ymd)
+    return exerciseInfo.sets.filter(s => moment(s.date).format('YYYYMMDD') === ymd)
 }
