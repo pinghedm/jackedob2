@@ -1,6 +1,7 @@
 import { useQuery, useQueries } from 'react-query'
 import { db, auth } from 'services/firebase'
 import { collection, query, getDocs, setDoc, doc, getDoc } from 'firebase/firestore'
+import moment from 'moment'
 
 export interface ExerciseInfo {
     name: string
@@ -74,17 +75,12 @@ export const useExerciseDetails = (exerciseSlugNames: string[], uid?: string): E
 
 export const mostRecentSet = (sets: ExerciseDetail['sets']) =>
     sets
-        .sort((s1, s2) => (s1.date < s2.date ? -1 : 1))
+        .sort((s1, s2) => moment(s1.date).diff(moment(s2.date)))
         .slice(-1)
         .pop()
 
 export const getSetsFromSameSession = (date: Date | string, exerciseInfo: ExerciseDetail) => {
     // we will assume any sets on the same calendar day as date are the same session
-    let ymd: string
-    if (date instanceof Date) {
-        ymd = date.toISOString().split('T')[0]
-    } else {
-        ymd = date.split('T')[0]
-    }
-    return exerciseInfo.sets.filter(s => s.date.startsWith(ymd))
+    const ymd = moment(date).format('YYYYMMDD')
+    return exerciseInfo.sets.filter(s => moment(date).format('YYYYMMDD') === ymd)
 }
