@@ -91,14 +91,19 @@ const History = ({ uid }: HistoryProps) => {
                 {getReducedExerciseDetails(exerciseDetails, exerciseSearch, searchDateString)
                     .sort((e1, e2) => e1.name.localeCompare(e2.name))
                     .map((e, i) => {
+                        const dateStringByDate: Record<string, string> = {}
                         const setsByDate = e.sets.reduce((memo, set) => {
-                            const date = moment(set.date).toDate().toLocaleDateString('en-US', {
-                                weekday: 'short',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                            })
+                            const date = moment(set.date).format('YYYYMMDD')
+                            const dateString = moment(set.date)
+                                .toDate()
+                                .toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                })
                             memo[date] = [...(memo?.[date] ?? []), set]
+                            dateStringByDate[date] = dateString
                             return memo
                         }, {} as Record<string, ExerciseDetail['sets']>)
                         return (
@@ -108,8 +113,8 @@ const History = ({ uid }: HistoryProps) => {
                                         {Object.entries(setsByDate)
                                             .sort((t1, t2) => -1 * t1[0].localeCompare(t2[0]))
                                             .map(([date, sets]) => (
-                                                <Col xs={{ span: 12 }} lg={{ span: 12 }} key={date}>
-                                                    <Card title={date}>
+                                                <Col xs={{ span: 24 }} lg={{ span: 12 }} key={date}>
+                                                    <Card title={dateStringByDate[date]}>
                                                         {sets.map((s, idx) => (
                                                             <div key={idx}>
                                                                 {s.reps} @{' '}
