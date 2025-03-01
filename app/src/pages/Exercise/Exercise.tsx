@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
     useExerciseDetails,
@@ -24,22 +24,27 @@ const Exercise = ({}: ExerciseProps) => {
     const plan = usePlanDetails(planToken ?? 'Definitely Invalid Token')
     const thisExercise = useExerciseDetails([exerciseSlugName])?.[0]
     const newestSet = mostRecentSet(thisExercise?.sets ?? [])
-    let unfinishedExercisesInPlan: ExerciseDetail[] = []
-    if (planToken) {
-        unfinishedExercisesInPlan =
-            plan?.exercises
-                ?.filter(e => {
-                    const s = mostRecentSet(e.sets)
-                    return (s && today !== new Date(s.date).toDateString()) || !s
-                })
-                .filter(e => e.name !== thisExercise?.name) ?? []
-    }
+    const unfinishedExercisesInPlan = useMemo(() => {
+        if (planToken) {
+            return (
+                plan?.exercises
+                    ?.filter(e => {
+                        const s = mostRecentSet(e.sets)
+                        return (s && today !== new Date(s.date).toDateString()) || !s
+                    })
+                    .filter(e => e.name !== thisExercise?.name) ?? []
+            )
+        }
+        return []
+    }, [planToken, plan])
     const [setsToday, setSetsToday] = useState<ExerciseDetail['sets']>(
         JSON.parse(window.sessionStorage.getItem(exerciseSlugName) || '[]'),
     )
+    useEffect(() => {
+        setSetsToday(JSON.parse(window.sessionStorage.getItem(exerciseSlugName) || '[]'))
+    }, [exerciseSlugName])
     const [newReps, setNewReps] = useState<number | null>(null)
     const [newWeight, setNewWeight] = useState<number | null>(null)
-
     const finishExerciseMutation = useMutation(
         (nothing: null) =>
             updateExerciseDetails({
@@ -98,7 +103,8 @@ const Exercise = ({}: ExerciseProps) => {
                                         exerciseSlugName,
                                         JSON.stringify(newSetsToday),
                                     )
-                                }}></Button>
+                                }}
+                            ></Button>
                         </div>
                     </List.Item>
                 ))}
@@ -111,7 +117,8 @@ const Exercise = ({}: ExerciseProps) => {
                     alignItems: 'center',
                     maxWidth: '450px',
                     height: '100px',
-                }}>
+                }}
+            >
                 <div>
                     <InputNumber
                         type="number"
@@ -174,7 +181,8 @@ const Exercise = ({}: ExerciseProps) => {
                                 JSON.stringify(newSetsToday),
                             )
                         }
-                    }}>
+                    }}
+                >
                     Record Set
                 </Button>
             </div>
@@ -187,7 +195,8 @@ const Exercise = ({}: ExerciseProps) => {
                         },
                     })
                     window.sessionStorage.removeItem(exerciseSlugName)
-                }}>
+                }}
+            >
                 Finish Exercise
             </Button>
             {plan?.token ? (
@@ -212,7 +221,8 @@ const Exercise = ({}: ExerciseProps) => {
                                 paddingTop: '15px',
                                 paddingBottom: '15px',
                                 height: '100%',
-                            }}>
+                            }}
+                        >
                             {e.name}
                         </Button>
                     ))}
